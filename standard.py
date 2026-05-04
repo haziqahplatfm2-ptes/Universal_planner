@@ -160,4 +160,4 @@ if 'adv_plan_out' in st.session_state:
     st.download_button("📥 Download Word (.docx)", doc_file, f"Advanced_Plan_{u_topic}.docx")
 
 st.markdown("---")
-st.caption("v3.5 | Integrated Professional Criteria | © 2026 PTES Innovation")
+st.caption("Lesson planner 3.0 | Developer: Hjh Nurul Haziqah Hj Nordin | © 2026 PTES Innovation")
