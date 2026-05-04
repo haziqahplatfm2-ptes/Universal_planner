@@ -84,18 +84,25 @@ def create_word_export(topic, syllabus, text):
 
     # Parsing and Boxing ALL Sections
     sections = text.split('SECTION:')
+ 
+    # Look for this section in your create_word_export function
     for section in sections:
         if not section.strip(): continue
         lines = section.strip().split('\n')
         title = lines[0].strip()
-        content = "\n".join(lines[1:]).strip()
+        
+        # ADD THIS LINE HERE to clean the text
+        content = "\n".join(lines[1:]).strip().replace("**", "") 
         
         doc.add_heading(title.title(), level=1)
         table = doc.add_table(rows=1, cols=1)
         table.style = 'Table Grid'
+        
+        # Use the cleaned 'content' variable here
         table.cell(0, 0).text = content
         doc.add_paragraph()
-
+    ################################################
+ 
     # HOD Approval
     doc.add_page_break()
     doc.add_heading("HOD Approval & Remarks", level=1)
