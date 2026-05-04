@@ -48,13 +48,13 @@ def generate_advanced_plan(topic, syllabus, extra_context):
     SECTION: OPENING LESSON CONTENT
     [Hook activity and transition plan]
 
-    SECTION: DIFFERENTIATION STRATEGIES (HA)
+    SECTION: DIFFERENTIATION STRATEGIES (GREEN)
     - HA (Higher Achiever): [1 challenging activity]
 
-    SECTION: DIFFERENTIATION STRATEGIES (MA)
+    SECTION: DIFFERENTIATION STRATEGIES (YELLOW)
     - MA (Medium Achiever): [1 core activity]
 
-    SECTION: DIFFERENTIATION STRATEGIES (LA)
+    SECTION: DIFFERENTIATION STRATEGIES (RED)
     - LA (Lower Achiever): [1 scaffolded activity]
 
     SECTION: BLENDED LEARNING Activity ONE (15 MINS)
@@ -69,7 +69,6 @@ def generate_advanced_plan(topic, syllabus, extra_context):
     - Objectives: [3 points]
     - Student Tasks: [Step-by-step details]
     
-
     SECTION: PLENARY (EXIT TICKET)
     [2-3 minute closing activity]
 
@@ -119,8 +118,7 @@ def create_word_export(topic, syllabus, text):
         # Use the cleaned 'content' variable here
         table.cell(0, 0).text = content
         doc.add_paragraph()
-    ################################################
- 
+     
     # HOD Approval
     doc.add_page_break()
     doc.add_heading("HOD Approval & Remarks", level=1)
@@ -138,8 +136,8 @@ def create_word_export(topic, syllabus, text):
 # --- 4. GUI ---
 st.set_page_config(page_title="Advanced Lesson Planner", layout="wide")
 
-st.title("🎓 Advanced Differentiated Lesson Planner")
-st.info("This version includes Objectives, HOTS, Differentiation (HA/MA/LA), and Blended Learning.")
+st.title("🎓 PTES Universal Lesson Planning Generator")
+st.info("Type in the lesson topic, the subject's syllabus code and the extra information like canva, youtube")
 
 c1, c2 = st.columns(2)
 with c1: u_topic = st.text_input("Lesson Topic:")
