@@ -88,7 +88,7 @@ def generate_advanced_plan(topic, syllabus, extra_context):
 # --- 3. WORD EXPORT LOGIC ---
 def create_word_export(topic, syllabus, text):
     doc = Document()
-    doc.add_heading(f'Advanced Lesson Plan: {topic}', 0)
+    doc.add_heading(f'PTES Lesson Plan: {topic}', 0)
 
     # Admin Header
     admin_table = doc.add_table(rows=3, cols=4)
@@ -136,8 +136,8 @@ def create_word_export(topic, syllabus, text):
 # --- 4. GUI ---
 st.set_page_config(page_title="Advanced Lesson Planner", layout="wide")
 
-st.title("🎓 PTES Universal Lesson Planning Generator")
-st.info("Type in the lesson topic, the subject's syllabus code and the extra information like canva, youtube")
+st.title("🎓 PTES Universal Lesson Planner")
+st.info("Type in the lesson topic, the subject's syllabus code and the extra information like canva, youtube, inforgraphic")
 
 c1, c2 = st.columns(2)
 with c1: u_topic = st.text_input("Lesson Topic:")
@@ -157,7 +157,7 @@ if 'adv_plan_out' in st.session_state:
     st.subheader("AI Draft Preview")
     st.text_area("Content", st.session_state['adv_plan_out'], height=400)
     doc_file = create_word_export(u_topic, u_syllabus, st.session_state['adv_plan_out'])
-    st.download_button("📥 Download Word (.docx)", doc_file, f"Advanced_Plan_{u_topic}.docx")
+    st.download_button("📥 Download to Word version (.docx)", doc_file, f"Universal_LP_{u_topic}.docx")
 
 st.markdown("---")
 st.caption("Lesson planner 3.0 | Developer: Hjh Nurul Haziqah Hj Nordin | © 2026 PTES Innovation")
