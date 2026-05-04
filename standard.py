@@ -65,8 +65,11 @@ def generate_advanced_plan(topic, syllabus, extra_context):
 
     SECTION: BLENDED LEARNING Activity TWO (15 MINS)
     - Activity 2: [Descriptions]
+    - print("-------------------------------------------------------------")
     - Teacher Preparation: [Step-by-step before lesson]
+    - print("-------------------------------------------------------------")
     - Objectives: [3 points]
+    - print("-------------------------------------------------------------")
     - Student Tasks: [Step-by-step details]
     
     SECTION: PLENARY (EXIT TICKET)
