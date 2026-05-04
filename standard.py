@@ -26,7 +26,8 @@ def generate_advanced_plan(topic, syllabus, extra_context):
     Topic: {topic}. Syllabus Code: {syllabus}. Context: {extra_context}.
     Generate a professional lesson plan in English. 
     Use the following EXACT markers for the document structure:
-
+    SECTION : TOPIC
+    [Please display the topic here following the input parameter from user]
     SECTION: LESSON OBJECTIVES
     [4 points]
     SECTION: LESSON OUTCOMES
@@ -46,15 +47,22 @@ def generate_advanced_plan(topic, syllabus, extra_context):
     [Hook activity and transition plan]
 
     SECTION: DIFFERENTIATION STRATEGIES
-    - HA (Higher Achiever): [1 challenging activity]
-    - MA (Medium Achiever): [1 core activity]
-    - LA (Lower Achiever): [1 scaffolded activity]
+    [one row for HA] - HA (Higher Achiever): [1 challenging activity]
+    [one row for MA] - MA (Medium Achiever): [1 core activity]
+    [one row for LA] - LA (Lower Achiever): [1 scaffolded activity]
 
     SECTION: BLENDED LEARNING (30 MINS)
-    - Activity 1 & 2: [Descriptions]
+    [One box or row for Activity 1 ]
+    - Activity 1: [Descriptions]
     - Teacher Preparation: [Step-by-step before lesson]
     - Objectives: [3 points]
     - Student Tasks: [Step-by-step details]
+    [One box or row for Activity 2 ]
+    - Activity 2: [Descriptions]
+    - Teacher Preparation: [Step-by-step before lesson]
+    - Objectives: [3 points]
+    - Student Tasks: [Step-by-step details]
+    
 
     SECTION: PLENARY (EXIT TICKET)
     [2-3 minute closing activity]
