@@ -26,7 +26,8 @@ def generate_advanced_plan(topic, syllabus, extra_context):
     Topic: {topic}. Syllabus Code: {syllabus}. Context: {extra_context}.
     Generate a professional lesson plan in English. 
     Use the following EXACT markers for the document structure:
-    SECTION : TOPIC
+    
+    SECTION: TOPIC
     [Please display the topic here following the input parameter from user]
     SECTION: LESSON OBJECTIVES
     [4 points]
@@ -43,21 +44,25 @@ def generate_advanced_plan(topic, syllabus, extra_context):
     SECTION: DIGITAL CITIZENSHIP
     [4 points on ethical tech use/Chromebooks/Canva/YouTube]
 
-    SECTION: SUGGESTED OPENING (WAY FORWARD)
+    SECTION: OPENING LESSON CONTENT
     [Hook activity and transition plan]
 
-    SECTION: DIFFERENTIATION STRATEGIES
-    [one row for HA] - HA (Higher Achiever): [1 challenging activity]
-    [one row for MA] - MA (Medium Achiever): [1 core activity]
-    [one row for LA] - LA (Lower Achiever): [1 scaffolded activity]
+    SECTION: DIFFERENTIATION STRATEGIES (HA)
+    - HA (Higher Achiever): [1 challenging activity]
 
-    SECTION: BLENDED LEARNING (30 MINS)
-    [One box or row for Activity 1 ]
+    SECTION: DIFFERENTIATION STRATEGIES (MA)
+    - MA (Medium Achiever): [1 core activity]
+
+    SECTION: DIFFERENTIATION STRATEGIES (LA)
+    - LA (Lower Achiever): [1 scaffolded activity]
+
+    SECTION: BLENDED LEARNING Activity ONE (15 MINS)
     - Activity 1: [Descriptions]
     - Teacher Preparation: [Step-by-step before lesson]
     - Objectives: [3 points]
     - Student Tasks: [Step-by-step details]
-    [One box or row for Activity 2 ]
+
+    SECTION: BLENDED LEARNING Activity TWO (15 MINS)
     - Activity 2: [Descriptions]
     - Teacher Preparation: [Step-by-step before lesson]
     - Objectives: [3 points]
@@ -69,6 +74,10 @@ def generate_advanced_plan(topic, syllabus, extra_context):
 
     SECTION: HOMEWORK
     [Task assigned based on topic]
+
+    SECTION: SUGGESTED WAY FORWARD TASK
+    [Hook activity and transition plan for next day lesson]
+    
     """
     try:
         response = model.generate_content(prompt)
