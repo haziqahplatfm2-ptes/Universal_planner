@@ -24,7 +24,8 @@ model = genai.GenerativeModel(selected_model_name)
 def generate_advanced_plan(topic, syllabus, extra_context):
     prompt = f"""
     Topic: {topic}. Syllabus Code: {syllabus}. Context: {extra_context}.
-    Generate a professional lesson plan in English. 
+    Generate a professional lesson plan in English. Unless specified in the Context: **Bahasa Melayu** or **convert to JAWI*.
+    
     Use the following EXACT markers for the document structure:
     
     SECTION: TOPIC
