@@ -1,7 +1,10 @@
 import streamlit as st
 import google.generativeai as genai
 from docx import Document
-from docx.shared import Pt
+from docx.shared import Pt, Inches
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
 from io import BytesIO
 
 # --- 1. CONFIGURATION ---
@@ -22,58 +25,65 @@ model = genai.GenerativeModel(selected_model_name)
 
 # --- 2. AI LOGIC (INTEGRATED CRITERIA) ---
 def generate_advanced_plan(topic, syllabus, extra_context):
+    # Rule 2, 4, and 5 are strictly enforced here
     prompt = f"""
     Topic: {topic}. Syllabus Code: {syllabus}. Context: {extra_context}.
     Generate a professional lesson plan in English.
     
+    CRITICAL RULES FOR CONTENT FORMATTING:
+    1. DO NOT use double asterisks (**) anywhere in your response.
+    2. DO NOT use bullet points (e.g., -, *, •) under any circumstances. If a section requires multiple items or a list, you MUST use numbers (1, 2, 3...) exclusively.
+    3. All heading markers below must remain in absolute CAPITAL LETTERS.
+
     Use the following EXACT markers for the document structure:
     
     SECTION: TOPIC
-    [Please display the topic here following the input parameter from user]
+    {topic}
+    
     SECTION: LESSON OBJECTIVES
-    [4 points]
+    [Provide exactly 4 numbered points using 1., 2., 3., 4.]
+    
     SECTION: LESSON OUTCOMES
-    [4 points]
+    [Provide exactly 4 numbered points using 1., 2., 3., 4.]
+    
     SECTION: SUCCESS CRITERIA
-    [4 points]
+    [Provide exactly 4 numbered points using 1., 2., 3., 4.]
+    
     SECTION: PREREQUISITE
-    [1 point]
+    [Provide 1 statement]
+    
     SECTION: KEYWORDS
-    [6 items]
+    [Provide 6 items separated by commas only. Do not make a list.]
+    
     SECTION: HOTS
-    [4 main domains from Bloom's Taxonomy]
+    [Provide exactly 4 numbered items indicating domains from Bloom's Taxonomy]
+    
     SECTION: DIGITAL CITIZENSHIP
-    [4 points on ethical tech use/Chromebooks/Canva/YouTube]
+    [Provide exactly 4 numbered points using 1., 2., 3., 4. on ethical tech use/Chromebooks/Canva/YouTube]
 
     SECTION: OPENING LESSON CONTENT
     [Hook activity and transition plan]
 
     SECTION: DIFFERENTIATION STRATEGIES (GREEN)
-    - HA (Higher Achiever): [1 challenging activity]
+    1. HA (Higher Achiever): [1 challenging activity]
 
     SECTION: DIFFERENTIATION STRATEGIES (YELLOW)
-    - MA (Medium Achiever): [1 core activity]
+    1. MA (Medium Achiever): [1 core activity]
 
     SECTION: DIFFERENTIATION STRATEGIES (RED)
-    - LA (Lower Achiever): [1 scaffolded activity]
+    1. LA (Lower Achiever): [1 scaffolded activity]
 
     SECTION: BLENDED LEARNING Activity ONE (15 MINS)
-    - Activity 1: [Descriptions]
-    - ----------------------------------------------------------------------------
-    - Teacher Preparation: [Step-by-step before lesson]
-    - ----------------------------------------------------------------------------
-    - Objectives: [3 points]
-    - ----------------------------------------------------------------------------
-    - Student Tasks: [Step-by-step details]
+    1. Activity 1: [Descriptions]
+    2. Teacher Preparation: [Step-by-step before lesson]
+    3. Objectives: [3 numbered points]
+    4. Student Tasks: [Step-by-step details]
 
     SECTION: BLENDED LEARNING Activity TWO (15 MINS)
-    - Activity 2: [Descriptions]
-    - -----------------------------------------------------------------------------
-    - Teacher Preparation: [Step-by-step before lesson]
-    - -----------------------------------------------------------------------------
-    - Objectives: [3 points]
-    - -----------------------------------------------------------------------------
-    - Student Tasks: [Step-by-step details]
+    1. Activity 2: [Descriptions]
+    2. Teacher Preparation: [Step-by-step before lesson]
+    3. Objectives: [3 numbered points]
+    4. Student Tasks: [Step-by-step details]
     
     SECTION: PLENARY (EXIT TICKET)
     [2-3 minute closing activity]
@@ -82,8 +92,7 @@ def generate_advanced_plan(topic, syllabus, extra_context):
     [Task assigned based on topic]
 
     SECTION: SUGGESTED WAY FORWARD TASK
-    - Hook Ac[Hook activity] and transition plan for next day lesson]
-    
+    [Hook activity and transition plan for next day lesson]
     """
     try:
         response = model.generate_content(prompt)
@@ -91,48 +100,153 @@ def generate_advanced_plan(topic, syllabus, extra_context):
     except Exception as e:
         return f"System Error: {str(e)}"
 
+def add_page_number(run):
+    """Helper function to inject dynamic Word field codes for top-centered page numbers."""
+    fldChar1 = OxmlElement('w:fldChar')
+    fldChar1.set(qn('w:fldCharType'), 'begin')
+    instrText = OxmlElement('w:instrText')
+    instrText.set(qn('xml:space'), 'preserve')
+    instrText.text = "PAGE"
+    fldChar2 = OxmlElement('w:fldChar')
+    fldChar2.set(qn('w:fldCharType'), 'separate')
+    fldChar3 = OxmlElement('w:fldChar')
+    fldChar3.set(qn('w:fldCharType'), 'end')
+    
+    run._r.append(fldChar1)
+    run._r.append(instrText)
+    run._r.append(fldChar2)
+    run._r.append(fldChar3)
+
 # --- 3. WORD EXPORT LOGIC ---
 def create_word_export(topic, syllabus, text):
     doc = Document()
-    doc.add_heading(f'PTES Lesson Plan: {topic}', 0)
+    
+    # Rule 1: Use Paper Size LETTER with 0.5-inch margins on all 4 corners
+    for section in doc.sections:
+        section.page_width = Inches(8.5)
+        section.page_height = Inches(11.0)
+        section.top_margin = Inches(0.5)
+        section.bottom_margin = Inches(0.5)
+        section.left_margin = Inches(0.5)
+        section.right_margin = Inches(0.5)
+        
+        # Rule 7: Insert Page Numbering to all pages, top and centered
+        header = section.header
+        header_p = header.paragraphs[0]
+        header_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        header_run = header_p.add_run()
+        header_run.font.name = 'Arial'
+        header_run.font.size = Pt(10)
+        add_page_number(header_run)
 
-    # Admin Header
+    # Rule 2 & 8: Section Main Heading in CAPITAL LETTERS with font size 14
+    main_title = f'PTES LESSON PLAN: {topic}'.upper()
+    title_p = doc.add_paragraph()
+    title_run = title_p.add_run(main_title)
+    title_run.font.size = Pt(14)
+    title_run.bold = True
+    
+    # Rule 3 & 8: Base text defaults using font size 12 and SINGLE spacing only
+    style = doc.styles['Normal']
+    font = style.font
+    font.name = 'Arial'
+    font.size = Pt(12)
+    style.paragraph_format.line_spacing = 1.0
+    style.paragraph_format.space_after = Pt(0)
+    style.paragraph_format.space_before = Pt(0)
+
+    # Admin Header Table
     admin_table = doc.add_table(rows=3, cols=4)
     admin_table.style = 'Table Grid'
     labels = [["Week No:", "Date:"], ["Class Size:", "Day:"], ["Venue:", "Duration:"]]
     for r in range(3):
         admin_table.cell(r, 0).text = labels[r][0]
         admin_table.cell(r, 2).text = labels[r][1]
-    doc.add_paragraph()
+        
+    for row in admin_table.rows:
+        for cell in row.cells:
+            for p in cell.paragraphs:
+                p.paragraph_format.line_spacing = 1.0
+                for run in p.runs:
+                    run.font.size = Pt(12)
+    doc.add_paragraph().paragraph_format.line_spacing = 1.0
 
     # Parsing and Boxing ALL Sections
     sections = text.split('SECTION:')
  
-    # Look for this section in your create_word_export function
     for section in sections:
         if not section.strip(): continue
         lines = section.strip().split('\n')
-        title = lines[0].strip()
         
-        # ADD THIS LINE HERE to clean the text
-        content = "\n".join(lines[1:]).strip().replace("**", "") 
+        # Rule 2 & 4: Capitalize all Heading Titles and drop double asterisks
+        title = lines[0].strip().replace("**", "").upper()
+        content_lines = lines[1:]
         
-        doc.add_heading(title.title(), level=1)
-        table = doc.add_table(rows=1, cols=1)
-        table.style = 'Table Grid'
-        
-        # Use the cleaned 'content' variable here
-        table.cell(0, 0).text = content
-        doc.add_paragraph()
+        doc_heading = doc.add_paragraph()
+        doc_heading.paragraph_format.line_spacing = 1.0
+        h_run = doc_heading.add_run(title)
+        h_run.bold = True
+        h_run.font.size = Pt(14)  # Rule 8: Section title size 14
+
+        # Rule 6: Handle Keyword section as a custom rows/columns table centered
+        if "KEYWORDS" in title:
+            raw_keywords_text = " ".join([l.strip() for l in content_lines if l.strip()])
+            keyword_items = [kw.strip() for kw in raw_keywords_text.split(",") if kw.strip()]
+            
+            # Defines a clean grid matrix (2 rows, 3 columns)
+            kw_table = doc.add_table(rows=2, cols=3)
+            kw_table.style = 'Table Grid'
+            
+            idx = 0
+            for r in range(2):
+                for c in range(3):
+                    if idx < len(keyword_items):
+                        cell = kw_table.cell(r, c)
+                        cell.text = keyword_items[idx]
+                        # Aligned to the center
+                        p = cell.paragraphs[0]
+                        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                        p.paragraph_format.line_spacing = 1.0
+                        if p.runs:
+                            p.runs[0].font.size = Pt(12)
+                        idx += 1
+            doc.add_paragraph().paragraph_format.line_spacing = 1.0
+        else:
+            table = doc.add_table(rows=1, cols=1)
+            table.style = 'Table Grid'
+            
+            # Rule 4: Strip double asterisks from regular body text block assignment
+            content = "\n".join([l.strip() for l in content_lines if l.strip()]).replace("**", "")
+            table.cell(0, 0).text = content
+            
+            p = table.cell(0, 0).paragraphs[0]
+            p.paragraph_format.line_spacing = 1.0
+            if p.runs:
+                p.runs[0].font.size = Pt(12)  # Rule 8: Rest of text font size 12
+            doc.add_paragraph().paragraph_format.line_spacing = 1.0
      
-    # HOD Approval
+    # HOD Approval Table Block
     doc.add_page_break()
-    doc.add_heading("HOD Approval & Remarks", level=1)
+    
+    hod_heading = doc.add_paragraph()
+    hod_heading.paragraph_format.line_spacing = 1.0
+    hod_run = hod_heading.add_run("HOD APPROVAL & REMARKS")
+    hod_run.bold = True
+    hod_run.font.size = Pt(14)
+    
     hod_table = doc.add_table(rows=2, cols=2)
     hod_table.style = 'Table Grid'
     hod_table.cell(0, 0).text = "Remarks:"
     hod_table.rows[1].height = Pt(50)
-    hod_table.cell(1, 0).text = "Date:"; hod_table.cell(1, 1).text = "Signature:"
+    hod_table.cell(1, 0).text = "Date:"
+    hod_table.cell(1, 1).text = "Signature:"
+    
+    for row in hod_table.rows:
+        for cell in row.cells:
+            p = cell.paragraphs[0]
+            p.paragraph_format.line_spacing = 1.0
+            if p.runs:
+                p.runs[0].font.size = Pt(12)
 
     bio = BytesIO()
     doc.save(bio)
@@ -143,7 +257,7 @@ def create_word_export(topic, syllabus, text):
 st.set_page_config(page_title="Advanced Lesson Planner", layout="wide")
 
 st.title("🎓 PTES Universal Lesson Planner")
-st.info("Type in the lesson topic, the subject's syllabus code and the extra information like canva, youtube, inforgraphic")
+st.info("Type in the lesson topic, the subject's syllabus code and the extra information like canva, youtube, infographic")
 
 c1, c2 = st.columns(2)
 with c1: u_topic = st.text_input("Lesson Topic:")
@@ -154,7 +268,7 @@ if st.button("🚀 GENERATE COMPLETE LESSON PLAN"):
     if u_topic and u_syllabus:
         with st.spinner("AI is integrating all criteria into your plan..."):
             result = generate_advanced_plan(u_topic, u_syllabus, u_extra)
-            st.session_state['adv_plan_out'] = result
+            st.session_state['adv_plan_out'] = result.replace("**", "")
     else:
         st.warning("Please fill in the Topic and Syllabus.")
 
