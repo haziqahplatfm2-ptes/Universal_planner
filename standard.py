@@ -25,7 +25,6 @@ model = genai.GenerativeModel(selected_model_name)
 
 # --- 2. AI LOGIC (INTEGRATED CRITERIA) ---
 def generate_advanced_plan(topic, syllabus, extra_context):
-    # Rule 2, 4, and 5 are strictly enforced here
     prompt = f"""
     Topic: {topic}. Syllabus Code: {syllabus}. Context: {extra_context}.
     Generate a professional lesson plan in English.
@@ -56,7 +55,10 @@ def generate_advanced_plan(topic, syllabus, extra_context):
     [Provide 6 items separated by commas only. Do not make a list.]
     
     SECTION: HOTS
-    [Provide exactly 4 numbered items indicating domains from Bloom's Taxonomy]
+    1. Analyzing: [Add direct context aligned to the topic]
+    2. Evaluating: [Add direct context aligned to the topic]
+    3. Creating: [Add direct context aligned to the topic]
+    4. Applying: [Add direct context aligned to the topic]
     
     SECTION: DIGITAL CITIZENSHIP
     [Provide exactly 4 numbered points using 1., 2., 3., 4. on ethical tech use/Chromebooks/Canva/YouTube]
@@ -101,7 +103,6 @@ def generate_advanced_plan(topic, syllabus, extra_context):
         return f"System Error: {str(e)}"
 
 def add_page_number(run):
-    """Helper function to inject dynamic Word field codes for top-centered page numbers."""
     fldChar1 = OxmlElement('w:fldChar')
     fldChar1.set(qn('w:fldCharType'), 'begin')
     instrText = OxmlElement('w:instrText')
@@ -121,7 +122,7 @@ def add_page_number(run):
 def create_word_export(topic, syllabus, text):
     doc = Document()
     
-    # Rule 1: Use Paper Size LETTER with 0.5-inch margins on all 4 corners
+    # Page setup
     for section in doc.sections:
         section.page_width = Inches(8.5)
         section.page_height = Inches(11.0)
@@ -130,7 +131,6 @@ def create_word_export(topic, syllabus, text):
         section.left_margin = Inches(0.5)
         section.right_margin = Inches(0.5)
         
-        # Rule 7: Insert Page Numbering to all pages, top and centered
         header = section.header
         header_p = header.paragraphs[0]
         header_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -139,14 +139,12 @@ def create_word_export(topic, syllabus, text):
         header_run.font.size = Pt(10)
         add_page_number(header_run)
 
-    # Rule 2 & 8: Section Main Heading in CAPITAL LETTERS with font size 14
     main_title = f'PTES LESSON PLAN: {topic}'.upper()
     title_p = doc.add_paragraph()
     title_run = title_p.add_run(main_title)
     title_run.font.size = Pt(14)
     title_run.bold = True
     
-    # Rule 3 & 8: Base text defaults using font size 12 and SINGLE spacing only
     style = doc.styles['Normal']
     font = style.font
     font.name = 'Arial'
@@ -171,14 +169,13 @@ def create_word_export(topic, syllabus, text):
                     run.font.size = Pt(12)
     doc.add_paragraph().paragraph_format.line_spacing = 1.0
 
-    # Parsing and Boxing ALL Sections
+    # Parsing and Boxing Sections
     sections = text.split('SECTION:')
  
     for section in sections:
         if not section.strip(): continue
         lines = section.strip().split('\n')
         
-        # Rule 2 & 4: Capitalize all Heading Titles and drop double asterisks
         title = lines[0].strip().replace("**", "").upper()
         content_lines = lines[1:]
         
@@ -186,14 +183,12 @@ def create_word_export(topic, syllabus, text):
         doc_heading.paragraph_format.line_spacing = 1.0
         h_run = doc_heading.add_run(title)
         h_run.bold = True
-        h_run.font.size = Pt(14)  # Rule 8: Section title size 14
+        h_run.font.size = Pt(14)
 
-        # Rule 6: Handle Keyword section as a custom rows/columns table centered
         if "KEYWORDS" in title:
             raw_keywords_text = " ".join([l.strip() for l in content_lines if l.strip()])
             keyword_items = [kw.strip() for kw in raw_keywords_text.split(",") if kw.strip()]
             
-            # Defines a clean grid matrix (2 rows, 3 columns)
             kw_table = doc.add_table(rows=2, cols=3)
             kw_table.style = 'Table Grid'
             
@@ -203,7 +198,6 @@ def create_word_export(topic, syllabus, text):
                     if idx < len(keyword_items):
                         cell = kw_table.cell(r, c)
                         cell.text = keyword_items[idx]
-                        # Aligned to the center
                         p = cell.paragraphs[0]
                         p.alignment = WD_ALIGN_PARAGRAPH.CENTER
                         p.paragraph_format.line_spacing = 1.0
@@ -215,14 +209,21 @@ def create_word_export(topic, syllabus, text):
             table = doc.add_table(rows=1, cols=1)
             table.style = 'Table Grid'
             
-            # Rule 4: Strip double asterisks from regular body text block assignment
+            # FIXED: Ensures text inside content lines parses accurately for standard blocks including HOTS
             content = "\n".join([l.strip() for l in content_lines if l.strip()]).replace("**", "")
             table.cell(0, 0).text = content
             
             p = table.cell(0, 0).paragraphs[0]
             p.paragraph_format.line_spacing = 1.0
-            if p.runs:
-                p.runs[0].font.size = Pt(12)  # Rule 8: Rest of text font size 12
+            
+            # Style reinforcement for table block content
+            for row in table.rows:
+                for cell in row.cells:
+                    for paragraph in cell.paragraphs:
+                        paragraph.paragraph_format.line_spacing = 1.0
+                        for run in paragraph.runs:
+                            run.font.size = Pt(12)
+                            
             doc.add_paragraph().paragraph_format.line_spacing = 1.0
      
     # HOD Approval Table Block
