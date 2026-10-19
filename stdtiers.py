@@ -347,4 +347,4 @@ if 'adv_plan_out' in st.session_state:
     st.download_button("📥 Download to Word version (.docx)", doc_file, f"Universal_LP_{u_topic}.docx")
 
 st.markdown("---")
-st.caption("Lesson planner TIERS 1.0 | Developer: Hjh Nurul Haziqah Hj Nordin | © 2026 PTES Innovation")
+st.caption("Lesson planner 3.0 | Developer: Hjh Nurul Haziqah Hj Nordin | © 2026 PTES Innovation")
