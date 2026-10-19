@@ -84,8 +84,8 @@ def generate_advanced_plan(topic, syllabus, extra_context):
     1. Analyzing: [Add direct context aligned to the topic]
     2. Applying: [Add direct context aligned to the topic]
     3. Creating: [Add direct context aligned to the topic]
-    4. Synthesising : [Add direct context aligned to the topic] 
-    
+    4. Synthesising: [Add direct context aligned to the topic]
+
     SECTION: BLENDED LEARNING Activity ONE (15 MINS)
     1. Activity 1: [Descriptions]
     2. Teacher Preparation: [Step-by-step before lesson]
@@ -218,57 +218,65 @@ def create_word_export(topic, syllabus, text):
             doc.add_paragraph().paragraph_format.line_spacing = 1.0
             
         elif "CORE-3-TIER ASSESSMENT FRAMEWORK" in title:
-            # Parse text blocks or sub-tiers and layout into structured 3-column tables for Tiers
             full_content = "\n".join(content_lines)
-            
-            # Simple splitter for the 3 tiers within the framework
             tiers = full_content.split("TIER ")
+            
             for tier in tiers:
                 if not tier.strip(): continue
                 tier_lines = tier.strip().split('\n')
                 tier_title = "TIER " + tier_lines[0].strip().replace("**", "")
                 tier_body = tier_lines[1:]
                 
-                # Tier sub-heading paragraph
-                t_p = doc.add_paragraph()
-                t_p.paragraph_format.line_spacing = 1.0
-                t_run = t_p.add_run(tier_title)
-                t_run.bold = True
-                t_run.font.size = Pt(12)
+                focus_lines = []
+                la_text, ma_text, ha_text, outcome_text = "", "", "", ""
                 
-                # Extract text for LA, MA, HA from body lines
-                la_text, ma_text, ha_text, focus_text = "", "", "", []
+                capture_mode = "focus"
                 for line in tier_body:
-                    if line.strip().startswith("LA Activity:"):
-                        la_text = line.replace("LA Activity:", "").strip()
-                    elif line.strip().startswith("MA Activity:"):
-                        ma_text = line.replace("MA Activity:", "").strip()
-                    elif line.strip().startswith("HA Activity:"):
-                        ha_text = line.replace("HA Activity:", "").strip()
+                    l_str = line.strip()
+                    if l_str.startswith("LA Activity:"):
+                        la_text = l_str.replace("LA Activity:", "").strip()
+                        capture_mode = "la"
+                    elif l_str.startswith("MA Activity:"):
+                        ma_text = l_str.replace("MA Activity:", "").strip()
+                        capture_mode = "ma"
+                    elif l_str.startswith("HA Activity:"):
+                        ha_text = l_str.replace("HA Activity:", "").strip()
+                        capture_mode = "ha"
+                    elif l_str.startswith("Expected Student Outcome:"):
+                        outcome_text = l_str.replace("Expected Student Outcome:", "").strip()
+                        capture_mode = "outcome"
                     else:
-                        focus_text.append(line.strip())
-                
-                # Add a summary focus block above table if present
-                if focus_text:
-                    f_p = doc.add_paragraph("\n".join(focus_text))
-                    f_p.paragraph_format.line_spacing = 1.0
-                    for r in f_p.runs: r.font.size = Pt(11)
+                        if capture_mode == "focus":
+                            focus_lines.append(l_str)
+                        elif capture_mode == "la":
+                            la_text += "\n" + l_str
+                        elif capture_mode == "ma":
+                            ma_text += "\n" + l_str
+                        elif capture_mode == "ha":
+                            ha_text += "\n" + l_str
+                        elif capture_mode == "outcome":
+                            outcome_text += "\n" + l_str
 
-                # Create 3-column table for LA, MA, HA
-                tier_table = doc.add_table(rows=2, cols=3)
+                tier_table = doc.add_table(rows=3, cols=3)
                 tier_table.style = 'Table Grid'
                 
-                # Header row
-                tier_table.cell(0, 0).text = "LA Differentiated Activity"
-                tier_table.cell(0, 1).text = "MA Differentiated Activity"
-                tier_table.cell(0, 2).text = "HA Differentiated Activity"
+                cell_zero = tier_table.cell(0, 0)
+                cell_zero.merge(tier_table.cell(0, 2))
+                focus_content = tier_title + "\n" + " ".join(focus_lines)
+                cell_zero.text = focus_content
                 
-                # Content row
-                tier_table.cell(1, 0).text = la_text if la_text else "Step-by-step task for LA students."
-                tier_table.cell(1, 1).text = ma_text if ma_text else "Step-by-step task for MA students."
-                tier_table.cell(1, 2).text = ha_text if ha_text else "Step-by-step task for HA students."
+                tier_table.cell(1, 0).text = "LA Differentiated Activity"
+                tier_table.cell(1, 1).text = "MA Differentiated Activity"
+                tier_table.cell(1, 2).text = "HA Differentiated Activity"
                 
-                # Format cell text and font sizes
+                la_content = f"Step-by-Step Assessment Task:\n{la_text}\n\nExpected Student Outcome:\n{outcome_text}"
+                ma_content = f"Step-by-Step Assessment Task:\n{ma_text}\n\nExpected Student Outcome:\n{outcome_text}"
+                ha_content = f"Step-by-Step Assessment Task:\n{ha_text}\n\nExpected Student Outcome:\n{outcome_text}"
+                
+                tier_table.cell(2, 0).text = la_content
+                tier_table.cell(2, 1).text = ma_content
+                tier_table.cell(2, 2).text = ha_content
+                
                 for row in tier_table.rows:
                     for cell in row.cells:
                         for p in cell.paragraphs:
