@@ -48,37 +48,42 @@ def generate_advanced_plan(topic, syllabus, extra_context):
     SECTION: SUCCESS CRITERIA
     [Provide exactly 4 numbered points using 1., 2., 3., 4.]
     
-    SECTION: LESSON STARTER (INTRODUCTION)
-    [Provide a checklist/review based on the GCE O-Level 2210 syllabus and scheme of work, reflecting on related prior knowledge of the given topic from previous syllabus content, merged smoothly with the opening hook activity and transition plan]
+    SECTION: PREREQUISITE
+    [Provide 1 statement]
     
     SECTION: KEYWORDS
     [Provide 6 items separated by commas only. Do not make a list.]
     
     SECTION: CORE-3-TIER ASSESSMENT FRAMEWORK
-    
-    TIER 1: FOUNDATION
+    Tier 1: Foundation
     Focus Area: Knowledge and recall foundation of the topic to establish baseline understanding and essential knowledge. Cognitive depth: Remembering and understanding ability.
-    LA Activity: [Provide step-by-step LA assessment task using MCQs, definitions, facts, formulas, or basic concepts]
-    MA Activity: [Provide step-by-step MA assessment task building on foundation]
-    HA Activity: [Provide step-by-step HA assessment task extending foundation]
+    Step-by-Step Typical Assessment Task: [Provide step-by-step description using MCQs, definitions, facts, formulas, or basic concepts aligned to the topic]
     Expected Student Outcome: Demonstrate understanding of core knowledge and skills.
 
-    TIER 2: PROGRESSION
+    Tier 2: Progression
     Focus Area: Progression through application and analysis to develop deeper understanding of the topic. Cognitive depth: Analysis and Application.
-    LA Activity: [Provide step-by-step LA activity using structured questions or guided data interpretation]
-    MA Activity: [Provide step-by-step MA activity using independent structured questions, data interpretation, or problem-solving]
-    HA Activity: [Provide step-by-step HA activity using complex multi-step tasks or advanced analysis]
+    Step-by-Step Typical Assessment Task: [Provide step-by-step description using structured questions, data interpretation, problem-solving, or multi-step tasks aligned to the topic]
     Expected Student Outcome: Applies knowledge accurately and analyses relationships between concepts.
 
-    TIER 3: MASTERY
+    Tier 3: Mastery
     Focus Area: Evaluation, synthesis, independent thinking, and higher-order reasoning. Cognitive depth: Evaluating and Creating.
-    LA Activity: [Provide scaffolded LA task for extended response or case study]
-    MA Activity: [Provide standard MA task for extended responses, essays, case studies, or investigations]
-    HA Activity: [Provide advanced HA task for complex unseen problem tasks or deep evaluation/synthesis]
+    Step-by-Step Typical Assessment Task: [Provide step-by-step description using extended responses, essays, case studies, investigations, or unseen problems aligned to the topic]
     Expected Student Outcome: Evaluates, synthesis and transfers learning to unfamiliar contexts.
     
     SECTION: DIGITAL CITIZENSHIP
     [Provide exactly 4 numbered points using 1., 2., 3., 4. on ethical tech use/Chromebooks/Canva/YouTube]
+
+    SECTION: OPENING LESSON CONTENT
+    [Hook activity and transition plan]
+
+    SECTION: DIFFERENTIATION STRATEGIES (GREEN)
+    1. HA (Higher Achiever): [1 challenging activity]
+
+    SECTION: DIFFERENTIATION STRATEGIES (YELLOW)
+    1. MA (Medium Achiever): [1 core activity]
+
+    SECTION: DIFFERENTIATION STRATEGIES (RED)
+    1. LA (Lower Achiever): [1 scaffolded activity]
 
     SECTION: BLENDED LEARNING Activity ONE (15 MINS)
     1. Activity 1: [Descriptions]
@@ -174,7 +179,7 @@ def create_word_export(topic, syllabus, text):
                     run.font.size = Pt(12)
     doc.add_paragraph().paragraph_format.line_spacing = 1.0
 
-    # Parsing and Formatting Sections
+    # Parsing and Boxing Sections
     sections = text.split('SECTION:')
  
     for section in sections:
@@ -210,69 +215,6 @@ def create_word_export(topic, syllabus, text):
                             p.runs[0].font.size = Pt(12)
                         idx += 1
             doc.add_paragraph().paragraph_format.line_spacing = 1.0
-            
-        elif "CORE-3-TIER ASSESSMENT FRAMEWORK" in title:
-            # Parse text blocks or sub-tiers and layout into structured 3-column tables for Tiers
-            full_content = "\n".join(content_lines)
-            
-            # Simple splitter for the 3 tiers within the framework
-            tiers = full_content.split("TIER ")
-            for tier in tiers:
-                if not tier.strip(): continue
-                tier_lines = tier.strip().split('\n')
-                tier_title = "TIER " + tier_lines[0].strip().replace("**", "")
-                tier_body = tier_lines[1:]
-                
-                # Tier sub-heading paragraph
-                t_p = doc.add_paragraph()
-                t_p.paragraph_format.line_spacing = 1.0
-                t_run = t_p.add_run(tier_title)
-                t_run.bold = True
-                t_run.font.size = Pt(12)
-                
-                # Extract text for LA, MA, HA from body lines
-                la_text, ma_text, ha_text, focus_text = "", "", "", []
-                for line in tier_body:
-                    if line.strip().startswith("LA Activity:"):
-                        la_text = line.replace("LA Activity:", "").strip()
-                    elif line.strip().startswith("MA Activity:"):
-                        ma_text = line.replace("MA Activity:", "").strip()
-                    elif line.strip().startswith("HA Activity:"):
-                        ha_text = line.replace("HA Activity:", "").strip()
-                    else:
-                        focus_text.append(line.strip())
-                
-                # Add a summary focus block above table if present
-                if focus_text:
-                    f_p = doc.add_paragraph("\n".join(focus_text))
-                    f_p.paragraph_format.line_spacing = 1.0
-                    for r in f_p.runs: r.font.size = Pt(11)
-
-                # Create 3-column table for LA, MA, HA
-                tier_table = doc.add_table(rows=2, cols=3)
-                tier_table.style = 'Table Grid'
-                
-                # Header row
-                tier_table.cell(0, 0).text = "LA Differentiated Activity"
-                tier_table.cell(0, 1).text = "MA Differentiated Activity"
-                tier_table.cell(0, 2).text = "HA Differentiated Activity"
-                
-                # Content row
-                tier_table.cell(1, 0).text = la_text if la_text else "Step-by-step task for LA students."
-                tier_table.cell(1, 1).text = ma_text if ma_text else "Step-by-step task for MA students."
-                tier_table.cell(1, 2).text = ha_text if ha_text else "Step-by-step task for HA students."
-                
-                # Format cell text and font sizes
-                for row in tier_table.rows:
-                    for cell in row.cells:
-                        for p in cell.paragraphs:
-                            p.paragraph_format.line_spacing = 1.0
-                            for run in p.runs:
-                                run.font.size = Pt(11)
-                                
-                doc.add_paragraph().paragraph_format.line_spacing = 1.0
-            doc.add_paragraph().paragraph_format.line_spacing = 1.0
-            
         else:
             table = doc.add_table(rows=1, cols=1)
             table.style = 'Table Grid'
