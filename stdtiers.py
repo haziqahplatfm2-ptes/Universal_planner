@@ -80,6 +80,12 @@ def generate_advanced_plan(topic, syllabus, extra_context):
     SECTION: DIGITAL CITIZENSHIP
     [Provide exactly 4 numbered points using 1., 2., 3., 4. on ethical tech use/Chromebooks/Canva/YouTube]
 
+    SECTION: HOTS
+    1. Analyzing: [Add direct context aligned to the topic]
+    2. Applying: [Add direct context aligned to the topic]
+    3. Creating: [Add direct context aligned to the topic]
+    4. Synthesising : [Add direct context aligned to the topic] 
+    
     SECTION: BLENDED LEARNING Activity ONE (15 MINS)
     1. Activity 1: [Descriptions]
     2. Teacher Preparation: [Step-by-step before lesson]
